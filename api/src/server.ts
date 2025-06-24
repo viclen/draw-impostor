@@ -1,7 +1,7 @@
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
-import { registerSocketHandlers } from "./sockets";
+import { registerSocketHandlers } from "./game";
 
 const app = express();
 const server = http.createServer(app);

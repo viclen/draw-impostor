@@ -1,9 +1,11 @@
 import { Server, Socket } from "socket.io";
-import { Game, Stroke, Point } from "./models/Game";
+import { Game, Stroke } from "./models/Game";
 import { Player } from "./models/Player";
 import { v4 as uuidv4 } from "uuid";
 
 const games = new Map<string, Game>();
+
+games.set("1", { id: "1", players: [], currentDrawerId: "", strokes: [] });
 
 export function registerSocketHandlers(io: Server) {
   io.on("connection", (socket: Socket) => {
@@ -32,9 +34,8 @@ export function registerSocketHandlers(io: Server) {
       game.players.push(player);
       socket.join(gameId);
 
-      io.to(gameId).emit("player_joined", {
-        players: game.players,
-      });
+      game.strokes.forEach((stroke) => socket.emit("draw", stroke));
+      io.to(gameId).emit("player_joined", { players: game.players });
     });
 
     socket.on(
@@ -44,7 +45,6 @@ export function registerSocketHandlers(io: Server) {
         if (!game) return;
 
         game.strokes.push(stroke);
-        // Broadcast to others in room
         socket.to(gameId).emit("draw", stroke);
       }
     );
