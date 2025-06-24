@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  web:
+    platform: linux/amd64
+    build: .
+    container_name: api-container
+    image: api-image
+    ports:
+      - "8080:8080"

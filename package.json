@@ -1,0 +1,29 @@
+{
+  "name": "draw-impostor",
+  "version": "1.0.0",
+  "description": "Quem é o impostor?",
+  "scripts": {
+    "dev:api": "cd api && yarn dev",
+    "dev:api:balancer": "cd api && yarn dev:balancer",
+    "dev:web": "cd web && yarn dev",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
+    "prepare": "husky install"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^9.15.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "husky": ">=6",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": "eslint --cache --fix",
+    "*.{js,css,md,jsx,ts,tsx}": "prettier --write"
+  }
+}
