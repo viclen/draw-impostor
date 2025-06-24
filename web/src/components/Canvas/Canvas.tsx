@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import io from 'socket.io-client';
-import type { Point, Stroke } from '../types';
-
-const socket = io('http://localhost:3000');
+import type { Point, Stroke } from '../../types';
+import { StyledCanvas } from './Canvas.styles';
+import { useGameContext } from '../../contexts/GameContext';
 
 const Canvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -10,10 +9,10 @@ const Canvas: React.FC = () => {
   const [drawing, setDrawing] = useState(false);
   const [points, setPoints] = useState<Point[]>([]);
 
-  const playerId = 'player-123';
-  const gameId = '1';
+  const { socket, player, send } = useGameContext();
 
-  const color = '#000';
+  const { color, id: playerId } = player || { color: "", id: "" };
+
   const width = 2;
 
   useEffect(() => {
@@ -25,18 +24,21 @@ const Canvas: React.FC = () => {
     ctx.lineJoin = 'round';
     ctxRef.current = ctx;
 
-    socket.on("connect", () => {
-      socket.emit("join_game", { gameId, playerName: "Player 1" });
-    });
-
     socket.on('draw', (stroke: Stroke) => {
       drawStroke(stroke);
+    });
+
+    socket.on('clear', () => {
+      const canvas = canvasRef.current;
+      if (canvas && ctxRef.current) {
+        ctxRef.current.clearRect(0, 0, canvas.width, canvas.height);
+      }
     });
 
     return () => {
       socket.off('draw');
     };
-  }, []);
+  }, [socket]);
 
   const startDrawing = (x: number, y: number) => {
     setDrawing(true);
@@ -57,8 +59,7 @@ const Canvas: React.FC = () => {
   const endDrawing = () => {
     setDrawing(false);
     if (points.length > 1) {
-      socket.emit('draw', {
-        gameId,
+      send('draw', {
         stroke: {
           playerId,
           points,
@@ -96,9 +97,8 @@ const Canvas: React.FC = () => {
   };
 
   return (
-    <canvas
+    <StyledCanvas
       ref={canvasRef}
-      style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', touchAction: 'none' }}
       onMouseDown={e => startDrawing(e.clientX, e.clientY)}
       onMouseMove={e => continueDrawing(e.clientX, e.clientY)}
       onMouseUp={endDrawing}
